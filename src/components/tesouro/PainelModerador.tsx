@@ -61,14 +61,8 @@ const doAno = await buscar({
 
     useEffect(() => {
     carregar();
-    const intervalo = window.setInterval(carregar, 10000);
-    const aoVoltarParaPagina = () => carregar();
-    window.addEventListener("focus", aoVoltarParaPagina);
-    return () => {
-      window.clearInterval(intervalo);
-      window.removeEventListener("focus", aoVoltarParaPagina);
-    };
   }, [carregar]);
+
 
 
 
@@ -249,19 +243,6 @@ const doAno = await buscar({
         >
           Atualizar
         </button>
-        <button
-  onClick={async () => {
-    try {
-      const resultado = await diagnosticar({ data: { senha } });
-      window.alert(JSON.stringify(resultado, null, 2));
-    } catch (e) {
-      window.alert(e instanceof Error ? e.message : String(e));
-    }
-  }}
-  className="mt-2 text-sm px-4 py-2 rounded-lg border"
->
-  Diagnóstico
-</button>
       </div>
     </div>
   );
