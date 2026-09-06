@@ -11,7 +11,6 @@ import {
 import {
   consolidadoModerador,
   excluirMembro,
-  diagnosticoBackend,
 } from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
@@ -27,7 +26,6 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const [erro, setErro] = useState("");
   const buscar = useServerFn(consolidadoModerador);
   const excluir = useServerFn(excluirMembro);
-  const diagnosticar = useServerFn(diagnosticoBackend);
   const [excluindo, setExcluindo] = useState("");
 
   const carregar = useCallback(async () => {
