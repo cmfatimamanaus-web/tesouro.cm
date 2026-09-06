@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicDiagnosticoRouteImport } from './routes/api/public/diagnostico'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDiagnosticoRoute = ApiPublicDiagnosticoRouteImport.update({
+  id: '/api/public/diagnostico',
+  path: '/api/public/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/diagnostico': typeof ApiPublicDiagnosticoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/diagnostico': typeof ApiPublicDiagnosticoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/diagnostico': typeof ApiPublicDiagnosticoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/diagnostico'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/diagnostico'
+  id: '__root__' | '/' | '/api/public/diagnostico'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicDiagnosticoRoute: typeof ApiPublicDiagnosticoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/diagnostico': {
+      id: '/api/public/diagnostico'
+      path: '/api/public/diagnostico'
+      fullPath: '/api/public/diagnostico'
+      preLoaderRoute: typeof ApiPublicDiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicDiagnosticoRoute: ApiPublicDiagnosticoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
