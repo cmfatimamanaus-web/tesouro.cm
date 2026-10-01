@@ -42,9 +42,9 @@ export function GradeRegistro({
   ].filter((g) => g.inicio <= totalDias);
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: COR.cream }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: COR.cream }}>
             <div
-        className="z-20 px-4 pt-4 pb-3"
+        className="shrink-0 z-20 px-4 pt-4 pb-3"
         style={{ background: COR.navyDeep, boxShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
       >
         <div className="flex items-center justify-between mb-2">
@@ -126,8 +126,8 @@ export function GradeRegistro({
         </div>
       )}
 
-      <div className="px-2 pt-3">
-        <div className="overflow-x-auto rounded-lg border" style={{ borderColor: `${COR.navy}22` }}>
+      <div className="flex-1 overflow-auto px-2 pt-3 pb-6">
+        <div className="rounded-lg border" style={{ borderColor: `${COR.navy}22` }}>
                     <table className="border-collapse" style={{ minWidth: 780, zoom: escalaTabela }}>
                         <thead className="sticky top-0 z-20">
               <tr>
