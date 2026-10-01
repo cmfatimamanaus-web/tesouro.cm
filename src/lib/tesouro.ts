@@ -24,7 +24,7 @@ export const COLUMNS: Coluna[] = [
   { id: "jejum", short: "Jejum", full: "Jejum", type: "check" },
   { id: "abst", short: "Abst.", full: "Abstinência", type: "check" },
   { id: "sacrif", short: "Sacrif.", full: "Sacrifício", type: "check" },
-  { id: "devParti", short: "Dev. Parti.", full: "Devoção particular", type: "check" },
+  { id: "devParti", short: "Dev. Parti.", full: "Devoção particular (nº de devoções feitas no dia)", type: "num" },
   { id: "confis", short: "Confis.", full: "Confissão", type: "check" },
 ];
 
