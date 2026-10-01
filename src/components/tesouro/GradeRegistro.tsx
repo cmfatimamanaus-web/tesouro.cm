@@ -11,6 +11,7 @@ export function GradeRegistro({
   onMudarPeriodo,
   onMudarDia,
   onVoltar,
+  onVerProgresso,
   salvando,
   erro,
 }: {
@@ -22,6 +23,7 @@ export function GradeRegistro({
   onMudarPeriodo: (mesIndex: number, ano: number) => void;
   onMudarDia: (dia: number, colId: string, valor: number) => void;
   onVoltar: () => void;
+  onVerProgresso?: () => void;
   salvando: boolean;
   erro: string;
 }) {
@@ -77,6 +79,11 @@ export function GradeRegistro({
         </div>
                 <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
           <span>{salvando ? "Salvando…" : "Salvo"}</span>
+          {onVerProgresso && (
+            <button onClick={onVerProgresso} className="px-2 py-1 rounded-md" style={{ background: COR.goldSoft, color: COR.navyDeep }}>
+              Meus gráficos e classificação
+            </button>
+          )}
           <span>Total do mês: <b style={{ color: COR.gold }}>{totalGeral}</b></span>
         </div>
         <div className="mt-2 flex items-center justify-between gap-2">

@@ -11,6 +11,7 @@ import {
 } from "@/lib/tesouro";
 import { Home } from "@/components/tesouro/Home";
 import { AutenticacaoMembro } from "@/components/tesouro/AutenticacaoMembro";
+import { MeuProgresso } from "@/components/tesouro/MeuProgresso";
 import { GradeRegistro } from "@/components/tesouro/GradeRegistro";
 import { LoginModerador } from "@/components/tesouro/LoginModerador";
 import { PainelModerador } from "@/components/tesouro/PainelModerador";
@@ -38,7 +39,7 @@ export const Route = createFileRoute("/")({
   component: TesouroEspiritualApp,
 });
 
-type Tela = "home" | "auth" | "grade" | "login-mod" | "painel-mod";
+type Tela = "home" | "auth" | "grade" | "progresso" | "login-mod" | "painel-mod";
 
 function TesouroEspiritualApp() {
   const hoje = new Date();
@@ -124,6 +125,10 @@ function TesouroEspiritualApp() {
     return <AutenticacaoMembro onEntrou={entrarNoApp} onVoltar={() => setTela("home")} />;
   }
 
+  if (tela === "progresso") {
+    return <MeuProgresso numero={numero} mesIndex={mesIndex} ano={ano} onVoltar={() => setTela("grade")} />;
+  }
+
   if (tela === "grade" && dias) {
     return (
       <GradeRegistro
@@ -135,6 +140,7 @@ function TesouroEspiritualApp() {
         onMudarPeriodo={abrirRegistro}
         onMudarDia={mudarDia}
         onVoltar={sair}
+        onVerProgresso={() => setTela("progresso")}
         salvando={salvando}
         erro={erroGrade}
       />

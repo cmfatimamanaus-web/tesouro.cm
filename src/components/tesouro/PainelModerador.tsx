@@ -14,12 +14,13 @@ import {
 } from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
+import { Ranking } from "./Ranking";
 
 export function PainelModerador({ senha, onSair }: { senha: string; onSair: () => void }) {
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
-  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos">("tabela");
+  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos" | "ranking">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
   const [anoDados, setAnoDados] = useState<RegistroAno[]>([]);
@@ -121,8 +122,8 @@ const doAno = await buscar({
             style={{ background: COR.ivory, color: COR.ink }}
           />
         </div>
-        <div className="flex gap-2 mt-3">
-          {(["tabela", "graficos", "comparativos"] as const).map((k) => (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {(["tabela", "graficos", "comparativos", "ranking"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setAba(k)}
@@ -133,7 +134,7 @@ const doAno = await buscar({
                 border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
               }}
             >
-              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : "Comparativos"}
+              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : "Classificação"}
             </button>
           ))}
         </div>
@@ -146,6 +147,11 @@ const doAno = await buscar({
           <p className="text-sm" style={{ color: "#8A1F1F" }}>{erro}</p>
         ) : aba === "graficos" ? (
           <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="mes" />
+        ) : aba === "ranking" ? (
+          <div className="space-y-4">
+            <Ranking itens={somar(registros)} titulo={`Classificação de ${MESES[mesIndex]}/${ano}`} legenda="Total de devoções realizadas no mês." />
+            <Ranking itens={somar(anoDados)} titulo={`Classificação do ano ${ano}`} legenda="Total de devoções realizadas no ano." />
+          </div>
         ) : aba === "comparativos" ? (
           <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="comparativo" />
         ) : registros.length === 0 ? (
@@ -244,4 +250,16 @@ const doAno = await buscar({
       </div>
     </div>
   );
+}
+
+function somar(rows: { numero: string; dias: Dias }[]) {
+  const m = new Map<string, number>();
+  rows.forEach((r) => {
+    const t = calcularTotais(r.dias);
+    const soma = COLUMNS.reduce((s, c) => s + (t[c.id] ?? 0), 0);
+    m.set(r.numero, (m.get(r.numero) ?? 0) + soma);
+  });
+  return [...m.entries()]
+    .map(([numero, total]) => ({ numero, total }))
+    .sort((a, b) => b.total - a.total || a.numero.localeCompare(b.numero, undefined, { numeric: true }));
 }
