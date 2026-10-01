@@ -80,8 +80,12 @@ export function GradeRegistro({
                 <div className="flex items-center justify-between text-xs" style={{ color: COR.goldSoft }}>
           <span>{salvando ? "Salvando…" : "Salvo"}</span>
           {onVerProgresso && (
-            <button onClick={onVerProgresso} className="px-2 py-1 rounded-md" style={{ background: COR.goldSoft, color: COR.navyDeep }}>
-              Meus gráficos e classificação
+            <button
+              onClick={onVerProgresso}
+              className="px-4 py-2 rounded-md text-sm font-semibold"
+              style={{ background: COR.goldSoft, color: COR.navyDeep }}
+            >
+              Minha vida espiritual
             </button>
           )}
           <span>Total do mês: <b style={{ color: COR.gold }}>{totalGeral}</b></span>
