@@ -40,6 +40,17 @@ export const excluirMembro = createServerFn({ method: "POST" })
       .eq("numero", data.numero);
     if (error) throw new Error(error.message);
 
+    // Remove também as passkeys e a conta de login, obrigando novo cadastro.
+    await supabaseAdmin.from("passkeys").delete().eq("numero", data.numero);
+
+    const email = `${data.numero}@tesouro.local`;
+    const { data: usuarios } = await supabaseAdmin.auth.admin.listUsers();
+    const conta = usuarios?.users?.find((u) => u.email === email);
+    if (conta) {
+      const { error: erroAuth } = await supabaseAdmin.auth.admin.deleteUser(conta.id);
+      if (erroAuth) throw new Error(erroAuth.message);
+    }
+
     return { ok: true };
   });
 
