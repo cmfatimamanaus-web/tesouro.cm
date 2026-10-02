@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { baixarRelatorioAnual } from "@/lib/relatorio-pdf";
 import { useServerFn } from "@tanstack/react-start";
 import {
   COLUMNS,
@@ -28,6 +29,21 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const buscar = useServerFn(consolidadoModerador);
   const excluir = useServerFn(excluirMembro);
   const [excluindo, setExcluindo] = useState("");
+  const [gerandoPdf, setGerandoPdf] = useState(false);
+  const graficosPdfRef = useRef<HTMLDivElement>(null);
+
+  const baixarPdf = async () => {
+    setGerandoPdf(true);
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      const d = anoDados.map((r) => ({ numero: (r as { numero: string }).numero, mesIndex: r.mesIndex, dias: r.dias }));
+      await baixarRelatorioAnual(ano, d, graficosPdfRef.current);
+    } catch (e) {
+      setErro(`Não foi possível gerar o PDF. ${e instanceof Error ? e.message : ""}`);
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -239,6 +255,21 @@ const doAno = await buscar({
               </table>
             </div>
           </>
+        )}
+        <button
+          onClick={baixarPdf}
+          disabled={gerandoPdf || carregando}
+          className="mt-4 mr-2 text-sm px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+          style={{ background: COR.navy, color: COR.ivory }}
+        >
+          {gerandoPdf ? "Gerando PDF…" : `Baixar PDF do ano ${ano}`}
+        </button>
+        {gerandoPdf && (
+          <div style={{ position: "fixed", left: -10000, top: 0, width: 1000, background: COR.cream }} aria-hidden>
+            <div ref={graficosPdfRef} style={{ padding: 12 }}>
+              <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="comparativo" />
+            </div>
+          </div>
         )}
         <button
           onClick={carregar}

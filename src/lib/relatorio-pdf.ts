@@ -108,10 +108,10 @@ export async function baixarRelatorioAnual(ano: number, anoDados: Reg[], grafico
     let y = H; // força nova página
     for (const [i, el] of blocos.entries()) {
       const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#FBF8F0" });
-      const grande = i < 2;
+      const grande = i < 1;
       const larg = grande ? W - margem * 2 : (W - margem * 3) / 2;
       const alt = (canvas.height / canvas.width) * larg;
-      const col = grande ? 0 : (i - 2) % 2;
+      const col = grande ? 0 : (i - 1) % 2;
       if (col === 0 && y + alt > H - margem) {
         doc.addPage();
         y = margem;
