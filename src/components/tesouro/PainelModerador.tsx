@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { baixarRelatorioAnual } from "@/lib/relatorio-pdf";
+import { baixarRelatorioAnual, baixarRelatorioMensal } from "@/lib/relatorio-pdf";
 import { useServerFn } from "@tanstack/react-start";
 import {
   COLUMNS,
@@ -30,7 +30,22 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const excluir = useServerFn(excluirMembro);
   const [excluindo, setExcluindo] = useState("");
   const [gerandoPdf, setGerandoPdf] = useState(false);
+  const [gerandoPdfMes, setGerandoPdfMes] = useState(false);
   const graficosPdfRef = useRef<HTMLDivElement>(null);
+  const graficosPdfMesRef = useRef<HTMLDivElement>(null);
+
+  const baixarPdfMes = async () => {
+    setGerandoPdfMes(true);
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      const d = registros.map((r) => ({ numero: r.numero, mesIndex, dias: r.dias }));
+      await baixarRelatorioMensal(mesIndex, ano, d, graficosPdfMesRef.current);
+    } catch (e) {
+      setErro(`Não foi possível gerar o PDF. ${e instanceof Error ? e.message : ""}`);
+    } finally {
+      setGerandoPdfMes(false);
+    }
+  };
 
   const baixarPdf = async () => {
     setGerandoPdf(true);
@@ -264,6 +279,21 @@ const doAno = await buscar({
         >
           {gerandoPdf ? "Gerando PDF…" : `Baixar PDF do ano ${ano}`}
         </button>
+        <button
+          onClick={baixarPdfMes}
+          disabled={gerandoPdfMes || carregando}
+          className="mt-4 mr-2 text-sm px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+          style={{ background: COR.navy, color: COR.ivory }}
+        >
+          {gerandoPdfMes ? "Gerando PDF…" : `Baixar PDF de ${MESES[mesIndex]}`}
+        </button>
+        {gerandoPdfMes && (
+          <div style={{ position: "fixed", left: -10000, top: 0, width: 1000, background: COR.cream }} aria-hidden>
+            <div ref={graficosPdfMesRef} style={{ padding: 12 }}>
+              <GraficosModerador registrosMes={registros} anoDados={anoDados} mesIndex={mesIndex} ano={ano} modo="mes" />
+            </div>
+          </div>
+        )}
         {gerandoPdf && (
           <div style={{ position: "fixed", left: -10000, top: 0, width: 1000, background: COR.cream }} aria-hidden>
             <div ref={graficosPdfRef} style={{ padding: 12 }}>

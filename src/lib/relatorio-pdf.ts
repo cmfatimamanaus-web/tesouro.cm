@@ -124,3 +124,119 @@ export async function baixarRelatorioAnual(ano: number, anoDados: Reg[], grafico
 
   doc.save(`tesouro-espiritual-${ano}.pdf`);
 }
+
+/** Gera e baixa o PDF com o resumo de um único mês. */
+export async function baixarRelatorioMensal(
+  mesIndex: number,
+  ano: number,
+  registros: Reg[],
+  graficos: HTMLElement | null,
+) {
+  const [{ jsPDF }, { default: autoTable }, { default: html2canvas }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+    import("html2canvas-pro"),
+  ]);
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const mesNome = MESES[mesIndex];
+
+  doc.setFontSize(18);
+  doc.setTextColor(...NAVY);
+  doc.text(`Tesouro Espiritual — Resumo de ${mesNome} de ${ano}`, 14, 16);
+  doc.setFontSize(10);
+  doc.setTextColor(90);
+  const membros = [...new Set(registros.map((r) => r.numero))].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true }),
+  );
+  doc.text(
+    `Congregação Mariana N. S. de Fátima · ${membros.length} membros com registro · gerado em ${new Date().toLocaleDateString("pt-BR")}`,
+    14,
+    22,
+  );
+
+  const head = [[
+    "Nº",
+    ...COLUMNS.map((c) => c.short),
+    "Total",
+  ]];
+  const estilo = {
+    styles: { fontSize: 8, cellPadding: 1.4, halign: "center" as const },
+    headStyles: { fillColor: NAVY, textColor: 255 },
+    footStyles: { fillColor: GOLD, textColor: NAVY },
+    columnStyles: { 0: { halign: "left" as const } },
+  };
+  const linha = (rotulo: string, t: Record<string, number>) => {
+    const vals = COLUMNS.map((c) => t[c.id] ?? 0);
+    return [rotulo, ...vals, vals.reduce((s, v) => s + v, 0)];
+  };
+  const somar = (regs: Reg[]) => {
+    const t: Record<string, number> = {};
+    regs.forEach((r) => {
+      const x = calcularTotais(r.dias);
+      COLUMNS.forEach((c) => (t[c.id] = (t[c.id] ?? 0) + (x[c.id] ?? 0)));
+    });
+    return t;
+  };
+  const geral = linha("Geral", somar(registros));
+
+  // 1. Totais por membro no mês
+  doc.setFontSize(12);
+  doc.setTextColor(...NAVY);
+  doc.text(`Totais por membro em ${mesNome}/${ano}`, 14, 30);
+  autoTable(doc, {
+    startY: 33,
+    head,
+    body: membros.map((n) => linha(n, somar(registros.filter((r) => r.numero === n)))),
+    foot: [geral],
+    ...estilo,
+  });
+
+  // 2. Classificação do mês
+  doc.addPage();
+  doc.setFontSize(12);
+  doc.setTextColor(...NAVY);
+  doc.text(`Classificação de ${mesNome}/${ano}`, 14, 14);
+  const total = (regs: Reg[]) => {
+    const t = somar(regs);
+    return COLUMNS.reduce((s, c) => s + (t[c.id] ?? 0), 0);
+  };
+  const rank = membros
+    .map((n) => ({ n, t: total(registros.filter((r) => r.numero === n)) }))
+    .sort((a, b) => b.t - a.t || a.n.localeCompare(b.n, undefined, { numeric: true }));
+  autoTable(doc, {
+    startY: 17,
+    head: [["Posição", "Nº", ...COLUMNS.map((c) => c.short), "Total no mês"]],
+    body: rank.map((r, i) => {
+      const t = somar(registros.filter((x) => x.numero === r.n));
+      return [`${i + 1}º`, r.n, ...COLUMNS.map((c) => t[c.id] ?? 0), r.t];
+    }),
+    ...estilo,
+  });
+
+  // 3. Gráficos do mês
+  if (graficos) {
+    const blocos = Array.from(
+      graficos.querySelectorAll<HTMLElement>("section.rounded-lg, section .grid > div"),
+    );
+    const margem = 10;
+    let y = H; // força nova página
+    for (const [i, el] of blocos.entries()) {
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#FBF8F0" });
+      const grande = i < 1;
+      const larg = grande ? W - margem * 2 : (W - margem * 3) / 2;
+      const alt = (canvas.height / canvas.width) * larg;
+      const col = grande ? 0 : (i - 1) % 2;
+      if (col === 0 && y + alt > H - margem) {
+        doc.addPage();
+        y = margem;
+      }
+      const x = margem + col * (larg + margem);
+      doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", x, y, larg, alt);
+      if (grande || col === 1) y += alt + 5;
+    }
+  }
+
+  doc.save(`tesouro-espiritual-${String(mesIndex + 1).padStart(2, "0")}-${ano}.pdf`);
+}
