@@ -101,20 +101,24 @@ export async function baixarRelatorioAnual(ano: number, anoDados: Reg[], grafico
 
   // 4. Gráficos
   if (graficos) {
-    const canvas = await html2canvas(graficos, { scale: 2, backgroundColor: "#F6F1E4" });
+    const blocos = Array.from(
+      graficos.querySelectorAll<HTMLElement>("section.rounded-lg, section .grid > div"),
+    );
     const margem = 10;
-    const larg = W - margem * 2;
-    const alturaPag = H - margem * 2;
-    const pxPorMm = canvas.width / larg;
-    const fatiaPx = Math.floor(alturaPag * pxPorMm);
-    for (let y = 0; y < canvas.height; y += fatiaPx) {
-      const h = Math.min(fatiaPx, canvas.height - y);
-      const parte = document.createElement("canvas");
-      parte.width = canvas.width;
-      parte.height = h;
-      parte.getContext("2d")!.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-      doc.addPage();
-      doc.addImage(parte.toDataURL("image/jpeg", 0.92), "JPEG", margem, margem, larg, h / pxPorMm);
+    let y = H; // força nova página
+    for (const [i, el] of blocos.entries()) {
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#FBF8F0" });
+      const grande = i < 2;
+      const larg = grande ? W - margem * 2 : (W - margem * 3) / 2;
+      const alt = (canvas.height / canvas.width) * larg;
+      const col = grande ? 0 : (i - 2) % 2;
+      if (col === 0 && y + alt > H - margem) {
+        doc.addPage();
+        y = margem;
+      }
+      const x = margem + col * (larg + margem);
+      doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", x, y, larg, alt);
+      if (grande || col === 1) y += alt + 5;
     }
   }
 
