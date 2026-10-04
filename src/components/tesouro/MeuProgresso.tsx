@@ -42,7 +42,7 @@ export function MeuProgresso({
   const [erro, setErro] = useState("");
   const [meses, setMeses] = useState<MesDoAno[]>([]);
   const [rank, setRank] = useState<ItemRanking[]>([]);
-  const [escopoRank, setEscopoRank] = useState<"ano" | "mes">("ano");
+  const [rankMes, setRankMes] = useState<ItemRanking[]>([]);
 
   const buscarAno = useServerFn(meusRegistrosDoAno);
   const buscarRank = useServerFn(rankingMembros);
@@ -53,21 +53,21 @@ export function MeuProgresso({
     setErro("");
     Promise.all([
       buscarAno({ data: { ano } }),
-      buscarRank({
-        data: escopoRank === "mes" ? { ano, mesAno: mesAnoKey(mesIndex, ano) } : { ano },
-      }),
+      buscarRank({ data: { ano } }),
+      buscarRank({ data: { ano, mesAno: mesAnoKey(mesIndex, ano) } }),
     ])
-      .then(([anoDados, ranking]) => {
+      .then(([anoDados, ranking, rankingMes]) => {
         if (!ativo) return;
         setMeses(anoDados.map((r) => ({ mesIndex: r.mesIndex, dias: r.dias as Dias })));
         setRank(ranking);
+        setRankMes(rankingMes);
       })
       .catch(() => ativo && setErro("Não foi possível carregar seus gráficos agora."))
       .finally(() => ativo && setCarregando(false));
     return () => {
       ativo = false;
     };
-  }, [ano, mesIndex, escopoRank, buscarAno, buscarRank]);
+  }, [ano, mesIndex, buscarAno, buscarRank]);
 
   const diasDoMes = useMemo(
     () => meses.find((m) => m.mesIndex === mesIndex)?.dias ?? {},
@@ -108,6 +108,7 @@ export function MeuProgresso({
   const totalAno = dadosAno.reduce((s, d) => s + d.total, 0);
   const totalMes = dadosMes.reduce((s, d) => s + d.quantidade, 0);
   const posicao = rank.findIndex((r) => r.numero === numero) + 1;
+  const posicaoMes = rankMes.findIndex((r) => r.numero === numero) + 1;
 
   return (
     <div className="min-h-screen pb-16" style={{ background: COR.cream }}>
@@ -120,16 +121,21 @@ export function MeuProgresso({
             Minha vida espiritual — Nº {numero}
           </span>
         </div>
-        <div className="flex gap-3 text-xs" style={{ color: COR.goldSoft }}>
+        <div className="flex flex-wrap gap-3 text-xs" style={{ color: COR.goldSoft }}>
           <span>
             {MESES[mesIndex]}: <b style={{ color: COR.gold }}>{totalMes}</b>
           </span>
           <span>
             Ano {ano}: <b style={{ color: COR.gold }}>{totalAno}</b>
           </span>
-          {posicao > 0 && (
+          {!carregando && !erro && posicaoMes > 0 && (
             <span>
-              Classificação: <b style={{ color: COR.gold }}>{posicao}º</b>
+              Classificação mensal: <b style={{ color: COR.gold }}>{posicaoMes}º</b>
+            </span>
+          )}
+          {!carregando && !erro && posicao > 0 && (
+            <span>
+              Classificação anual: <b style={{ color: COR.gold }}>{posicao}º</b>
             </span>
           )}
         </div>
@@ -212,27 +218,17 @@ export function MeuProgresso({
           </>
         ) : (
           <>
-            <div className="flex gap-2">
-              {(["ano", "mes"] as const).map((k) => (
-                <button
-                  key={k}
-                  onClick={() => setEscopoRank(k)}
-                  className="px-3 py-1.5 rounded-lg text-xs border"
-                  style={{
-                    background: escopoRank === k ? COR.navy : "transparent",
-                    color: escopoRank === k ? COR.ivory : COR.navyDeep,
-                    borderColor: `${COR.navy}44`,
-                  }}
-                >
-                  {k === "ano" ? `Ano ${ano}` : `${MESES[mesIndex]}`}
-                </button>
-              ))}
-            </div>
+            <Ranking
+              itens={rankMes}
+              destaque={numero}
+              titulo={`Classificação de ${MESES[mesIndex]} de ${ano}`}
+              legenda="Total de devoções realizadas no mês. Os membros aparecem apenas pelo número."
+            />
             <Ranking
               itens={rank}
               destaque={numero}
-              titulo={escopoRank === "ano" ? `Classificação do ano ${ano}` : `Classificação de ${MESES[mesIndex]}`}
-              legenda="Total de devoções realizadas. Os membros aparecem apenas pelo número."
+              titulo={`Classificação do ano ${ano}`}
+              legenda="Total de devoções realizadas no ano. Os membros aparecem apenas pelo número."
             />
           </>
         )}
