@@ -82,7 +82,10 @@ export function calcularTotais(dias: Dias | null | undefined) {
 /* ============ Autenticação por número + senha ============ */
 
 export function normalizarNumero(numero: string) {
-  return numero.trim().toLowerCase().replace(/[^0-9a-z-]/g, "");
+  const limpo = numero.trim().toLowerCase().replace(/[^0-9a-z-]/g, "");
+  // Números só com dígitos ficam padronizados com pelo menos 2 dígitos: 2 → 02, 002 → 02
+  if (/^\d+$/.test(limpo)) return (limpo.replace(/^0+/, "") || "0").padStart(2, "0");
+  return limpo;
 }
 
 export function emailDoNumero(numero: string) {
