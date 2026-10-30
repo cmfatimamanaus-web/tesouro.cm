@@ -32,7 +32,7 @@ export function AtivarNotificacoes() {
         await registrar({ data: { token: r.token, plataforma: navigator.userAgent } });
         setAtivo(true);
         setAviso("Pronto! Você receberá os avisos da Congregação neste aparelho.");
-      } else setAviso(MENSAGENS[r.status]);
+      } else setAviso(MENSAGENS[r.status] ?? "");
     } catch (e) {
       setAviso(`Não foi possível ativar agora. ${e instanceof Error ? e.message : ""}`);
     } finally {
