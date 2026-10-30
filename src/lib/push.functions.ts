@@ -18,7 +18,7 @@ export const registrarDispositivo = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const email = String((context.claims as { email?: string }).email ?? "");
-    const numero = email.endsWith("@tesouro.local") ? email.split("@")[0] : null;
+    const numero = email.endsWith("@tesouro.local") ? email.split("@")[0] ?? null : null;
     const { getAdminClient } = await import("@/lib/supabase-admin.server");
     const { error } = await getAdminClient()
       .from("push_inscricoes")
