@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      notificacoes_enviadas: {
+        Row: {
+          categoria: string
+          chave_envio: string
+          corpo: string
+          enviado_em: string
+          erro: string | null
+          falhas: number
+          id: string
+          status: string
+          sucesso: number
+          titulo: string
+          tokens_removidos: number
+          total: number
+          url: string
+        }
+        Insert: {
+          categoria?: string
+          chave_envio: string
+          corpo: string
+          enviado_em?: string
+          erro?: string | null
+          falhas?: number
+          id?: string
+          status?: string
+          sucesso?: number
+          titulo: string
+          tokens_removidos?: number
+          total?: number
+          url?: string
+        }
+        Update: {
+          categoria?: string
+          chave_envio?: string
+          corpo?: string
+          enviado_em?: string
+          erro?: string | null
+          falhas?: number
+          id?: string
+          status?: string
+          sucesso?: number
+          titulo?: string
+          tokens_removidos?: number
+          total?: number
+          url?: string
+        }
+        Relationships: []
+      }
       passkey_desafios: {
         Row: {
           created_at: string
@@ -74,6 +122,42 @@ export type Database = {
           transports?: string[]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      push_inscricoes: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          categorias: string[]
+          criado_em: string
+          id: string
+          numero: string | null
+          plataforma: string | null
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          categorias?: string[]
+          criado_em?: string
+          id?: string
+          numero?: string | null
+          plataforma?: string | null
+          token: string
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          categorias?: string[]
+          criado_em?: string
+          id?: string
+          numero?: string | null
+          plataforma?: string | null
+          token?: string
+          user_id?: string | null
         }
         Relationships: []
       }
