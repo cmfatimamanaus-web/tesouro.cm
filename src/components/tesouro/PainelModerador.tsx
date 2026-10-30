@@ -16,12 +16,13 @@ import {
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
 import { Ranking } from "./Ranking";
+import { CentralNotificacoes } from "./CentralNotificacoes";
 
 export function PainelModerador({ senha, onSair }: { senha: string; onSair: () => void }) {
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
-  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos" | "ranking">("tabela");
+  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos" | "ranking" | "avisos">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
   const [anoDados, setAnoDados] = useState<RegistroAno[]>([]);
@@ -154,7 +155,7 @@ const doAno = await buscar({
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
-          {(["tabela", "graficos", "comparativos", "ranking"] as const).map((k) => (
+          {(["tabela", "graficos", "comparativos", "ranking", "avisos"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setAba(k)}
@@ -165,14 +166,16 @@ const doAno = await buscar({
                 border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
               }}
             >
-              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : "Classificação"}
+              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : k === "ranking" ? "Classificação" : "Notificações"}
             </button>
           ))}
         </div>
       </div>
 
       <div className="px-4 pt-4">
-        {carregando ? (
+        {aba === "avisos" ? (
+          <CentralNotificacoes senha={senha} />
+        ) : carregando ? (
           <p className="text-sm" style={{ color: COR.navyDeep }}>Carregando registros…</p>
         ) : erro ? (
           <p className="text-sm" style={{ color: "#8A1F1F" }}>{erro}</p>
