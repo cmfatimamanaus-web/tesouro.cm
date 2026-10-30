@@ -166,7 +166,7 @@ const doAno = await buscar({
                 border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
               }}
             >
-              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : "Classificação"}
+              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : k === "ranking" ? "Classificação" : "Notificações"}
             </button>
           ))}
         </div>
