@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AtivarNotificacoes } from "./AtivarNotificacoes";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bar,
@@ -158,6 +159,7 @@ export function MeuProgresso({
       </div>
 
       <div className="px-4 pt-4 space-y-4">
+        <AtivarNotificacoes />
         {carregando ? (
           <p className="text-sm" style={{ color: COR.navyDeep }}>Carregando seus gráficos…</p>
         ) : erro ? (
