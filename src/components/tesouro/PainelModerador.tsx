@@ -12,6 +12,7 @@ import {
 import {
   consolidadoModerador,
   excluirMembro,
+  redefinirSenhaMembro,
 } from "@/lib/moderador.functions";
 import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
@@ -29,6 +30,7 @@ export function PainelModerador({ senha, onSair }: { senha: string; onSair: () =
   const [erro, setErro] = useState("");
   const buscar = useServerFn(consolidadoModerador);
   const excluir = useServerFn(excluirMembro);
+  const redefinir = useServerFn(redefinirSenhaMembro);
   const [excluindo, setExcluindo] = useState("");
   const [gerandoPdf, setGerandoPdf] = useState(false);
   const [gerandoPdfMes, setGerandoPdfMes] = useState(false);
@@ -108,6 +110,21 @@ const doAno = await buscar({
       setErro("Não foi possível excluir esse número agora.");
     } finally {
       setExcluindo("");
+    }
+  };
+
+  const redefinirSenha = async (num: string) => {
+    const nova = window.prompt(`Nova senha para o nº ${num} (mínimo 6 caracteres):`);
+    if (nova === null) return;
+    if (nova.trim().length < 6) {
+      window.alert("A senha deve ter ao menos 6 caracteres.");
+      return;
+    }
+    try {
+      await redefinir({ data: { senha, numero: num, novaSenha: nova.trim() } });
+      window.alert(`Senha do nº ${num} redefinida. Informe a nova senha ao membro.`);
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "Não foi possível redefinir a senha agora.");
     }
   };
 
@@ -239,7 +256,14 @@ const doAno = await buscar({
                           {m.totais[c.id]}
                         </td>
                       ))}
-                      <td className="px-2 py-1.5 text-center">
+                      <td className="px-2 py-1.5 text-center whitespace-nowrap">
+                        <button
+                          onClick={() => redefinirSenha(m.numero)}
+                          className="text-xs px-2 py-1 rounded-md border mr-1"
+                          style={{ borderColor: `${COR.navy}55`, color: COR.navy }}
+                        >
+                          Nova senha
+                        </button>
                         <button
                           onClick={() => removerMembro(m.numero)}
                           disabled={excluindo === m.numero}

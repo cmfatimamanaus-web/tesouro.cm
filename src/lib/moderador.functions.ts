@@ -85,3 +85,28 @@ export const diagnosticoBackend = createServerFn({ method: "POST" })
       };
     }
   });
+
+export const redefinirSenhaMembro = createServerFn({ method: "POST" })
+  .inputValidator((input: { senha: string; numero: string; novaSenha: string }) => input)
+  .handler(async ({ data }) => {
+    validarSenha(data.senha);
+    if (!data.novaSenha || data.novaSenha.length < 6) {
+      throw new Error("A nova senha deve ter ao menos 6 caracteres.");
+    }
+    const limpo = data.numero.trim().toLowerCase().replace(/[^0-9a-z-]/g, "");
+    const numeroNorm = /^\d+$/.test(limpo)
+      ? (limpo.replace(/^0+/, "") || "0").padStart(2, "0")
+      : limpo;
+    const { getAdminClient } = await import("@/lib/supabase-admin.server");
+    const supabaseAdmin = getAdminClient();
+    const email = `${numeroNorm}@tesouro.local`;
+    const { data: usuarios, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (error) throw new Error(error.message);
+    const conta = usuarios?.users?.find((u) => u.email === email);
+    if (!conta) throw new Error("Não existe conta de login para esse número.");
+    const { error: erroUpd } = await supabaseAdmin.auth.admin.updateUserById(conta.id, {
+      password: data.novaSenha,
+    });
+    if (erroUpd) throw new Error(erroUpd.message);
+    return { ok: true };
+  });
