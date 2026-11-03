@@ -18,12 +18,13 @@ import { ShieldMark } from "./Shared";
 import { GraficosModerador, type RegistroAno } from "./GraficosModerador";
 import { Ranking } from "./Ranking";
 import { CentralNotificacoes } from "./CentralNotificacoes";
+import { MembrosCadastrados } from "./MembrosCadastrados";
 
 export function PainelModerador({ senha, onSair }: { senha: string; onSair: () => void }) {
   const hoje = new Date();
   const [mesIndex, setMesIndex] = useState(hoje.getMonth());
   const [ano, setAno] = useState(hoje.getFullYear());
-  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos" | "ranking" | "avisos">("tabela");
+  const [aba, setAba] = useState<"tabela" | "graficos" | "comparativos" | "ranking" | "avisos" | "membros">("tabela");
   const [carregando, setCarregando] = useState(true);
   const [registros, setRegistros] = useState<{ numero: string; dias: Dias }[]>([]);
   const [anoDados, setAnoDados] = useState<RegistroAno[]>([]);
@@ -172,7 +173,7 @@ const doAno = await buscar({
           />
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
-          {(["tabela", "graficos", "comparativos", "ranking", "avisos"] as const).map((k) => (
+          {(["tabela", "graficos", "comparativos", "ranking", "membros", "avisos"] as const).map((k) => (
             <button
               key={k}
               onClick={() => setAba(k)}
@@ -183,7 +184,7 @@ const doAno = await buscar({
                 border: `1px solid ${aba === k ? COR.goldSoft : `${COR.goldSoft}66`}`,
               }}
             >
-              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : k === "ranking" ? "Classificação" : "Notificações"}
+              {k === "tabela" ? "Tabela" : k === "graficos" ? "Gráficos do mês" : k === "comparativos" ? "Comparativos" : k === "ranking" ? "Classificação" : k === "membros" ? "Cadastrados" : "Notificações"}
             </button>
           ))}
         </div>
@@ -192,6 +193,8 @@ const doAno = await buscar({
       <div className="px-4 pt-4">
         {aba === "avisos" ? (
           <CentralNotificacoes senha={senha} />
+        ) : aba === "membros" ? (
+          <MembrosCadastrados senha={senha} />
         ) : carregando ? (
           <p className="text-sm" style={{ color: COR.navyDeep }}>Carregando registros…</p>
         ) : erro ? (

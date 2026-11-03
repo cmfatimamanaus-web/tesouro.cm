@@ -110,3 +110,27 @@ export const redefinirSenhaMembro = createServerFn({ method: "POST" })
     if (erroUpd) throw new Error(erroUpd.message);
     return { ok: true };
   });
+
+export const listarMembrosCadastrados = createServerFn({ method: "POST" })
+  .inputValidator((input: { senha: string }) => input)
+  .handler(async ({ data }) => {
+    validarSenha(data.senha);
+    const { getAdminClient } = await import("@/lib/supabase-admin.server");
+    const supabaseAdmin = getAdminClient();
+    const { data: usuarios, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (error) throw new Error(error.message);
+    const { data: regs } = await supabaseAdmin.from("registros").select("user_id, updated_at");
+    const ultimo: Record<string, string> = {};
+    (regs ?? []).forEach((r) => {
+      if (r.user_id && (!ultimo[r.user_id] || r.updated_at > ultimo[r.user_id]!)) ultimo[r.user_id] = r.updated_at;
+    });
+    return (usuarios?.users ?? [])
+      .filter((u) => (u.email ?? "").endsWith("@tesouro.local"))
+      .map((u) => ({
+        numero: String(u.email).split("@")[0]!,
+        cadastradoEm: u.created_at,
+        ultimoAcesso: u.last_sign_in_at ?? null,
+        ultimoLancamento: ultimo[u.id] ?? null,
+      }))
+      .sort((a, b) => a.numero.localeCompare(b.numero, "pt-BR", { numeric: true }));
+  });
