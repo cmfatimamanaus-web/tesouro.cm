@@ -158,7 +158,7 @@ export function AutenticacaoMembro({
 
         <p className="mt-6 text-xs leading-relaxed" style={{ color: `${COR.navyDeep}99` }}>
           Cada membro vê apenas o seu próprio tesouro espiritual. Guarde bem a sua senha:
-          como não usamos e-mail, ela não pode ser recuperada automaticamente.
+          se esquecer, peça ao responsável para criar uma nova senha para você.
         </p>
       </div>
     </div>
