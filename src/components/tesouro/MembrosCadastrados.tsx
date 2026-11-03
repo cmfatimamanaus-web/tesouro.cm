@@ -86,6 +86,7 @@ export function MembrosCadastrados({ senha }: { senha: string }) {
               <th className="px-3 py-2 text-left text-xs font-medium">Cadastro</th>
               <th className="px-3 py-2 text-left text-xs font-medium">Último acesso</th>
               <th className="px-3 py-2 text-left text-xs font-medium">Último lançamento</th>
+              <th className="px-3 py-2 text-left text-xs font-medium">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -95,6 +96,23 @@ export function MembrosCadastrados({ senha }: { senha: string }) {
                 <td className="px-3 py-2">{fmt(m.cadastradoEm)}</td>
                 <td className="px-3 py-2">{fmt(m.ultimoAcesso)}</td>
                 <td className="px-3 py-2">{m.ultimoLancamento ? fmt(m.ultimoLancamento) : "Nenhum ainda"}</td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <button
+                    onClick={() => redefinirSenha(m.numero)}
+                    className="text-xs px-2 py-1 rounded-md border mr-1"
+                    style={{ borderColor: `${COR.navy}55`, color: COR.navy }}
+                  >
+                    Nova senha
+                  </button>
+                  <button
+                    onClick={() => removerMembro(m.numero)}
+                    disabled={excluindo === m.numero}
+                    className="text-xs px-2 py-1 rounded-md border disabled:opacity-50"
+                    style={{ borderColor: "#8A1F1F55", color: "#8A1F1F" }}
+                  >
+                    {excluindo === m.numero ? "…" : "Excluir"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
