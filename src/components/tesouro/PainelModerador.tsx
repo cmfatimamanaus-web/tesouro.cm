@@ -238,7 +238,7 @@ const doAno = await buscar({
                       className="px-2 py-2 text-[11px] font-medium text-center"
                       style={{ background: COR.navy, color: COR.ivory, minWidth: 60 }}
                     >
-                      Excluir
+                      Ações
                     </th>
                   </tr>
                 </thead>
