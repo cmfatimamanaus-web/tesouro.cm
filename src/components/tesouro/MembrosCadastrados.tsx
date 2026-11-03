@@ -14,9 +14,12 @@ const fmt = (d: string | null) =>
 
 export function MembrosCadastrados({ senha }: { senha: string }) {
   const listar = useServerFn(listarMembrosCadastrados);
+  const excluir = useServerFn(excluirMembro);
+  const redefinir = useServerFn(redefinirSenhaMembro);
   const [membros, setMembros] = useState<Membro[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+  const [excluindo, setExcluindo] = useState("");
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -29,6 +32,34 @@ export function MembrosCadastrados({ senha }: { senha: string }) {
       setCarregando(false);
     }
   }, [listar, senha]);
+
+  const removerMembro = async (num: string) => {
+    if (!window.confirm(`Excluir o número ${num} e todos os seus registros? Esta ação não pode ser desfeita.`)) return;
+    setExcluindo(num);
+    try {
+      await excluir({ data: { senha, numero: num } });
+      await carregar();
+    } catch {
+      window.alert("Não foi possível excluir esse número agora.");
+    } finally {
+      setExcluindo("");
+    }
+  };
+
+  const redefinirSenha = async (num: string) => {
+    const nova = window.prompt(`Nova senha para o nº ${num} (mínimo 6 caracteres):`);
+    if (nova === null) return;
+    if (nova.trim().length < 6) {
+      window.alert("A senha deve ter ao menos 6 caracteres.");
+      return;
+    }
+    try {
+      await redefinir({ data: { senha, numero: num, novaSenha: nova.trim() } });
+      window.alert(`Senha do nº ${num} redefinida. Informe a nova senha ao membro.`);
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "Não foi possível redefinir a senha agora.");
+    }
+  };
 
   useEffect(() => {
     carregar();
