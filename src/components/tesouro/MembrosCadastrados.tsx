@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { COR } from "@/lib/tesouro";
-import { listarMembrosCadastrados } from "@/lib/moderador.functions";
+import {
+  listarMembrosCadastrados,
+  excluirMembro,
+  redefinirSenhaMembro,
+} from "@/lib/moderador.functions";
 
 type Membro = { numero: string; cadastradoEm: string; ultimoAcesso: string | null; ultimoLancamento: string | null };
 
